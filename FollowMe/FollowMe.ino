@@ -95,17 +95,13 @@
 #define MPU6050_D5 5
 #define MPU6050_D6 6
 #define MPU6050_D7 7
-
-// AUX_VDDIO Register
 #define MPU6050_AUX_VDDIO MPU6050_D7  // I2C high: 1=VDD, 0=VLOGIC
-
 #define MPU6050_DLPF_CFG0     MPU6050_D0
 #define MPU6050_DLPF_CFG1     MPU6050_D1
 #define MPU6050_DLPF_CFG2     MPU6050_D2
 #define MPU6050_EXT_SYNC_SET0 MPU6050_D3
 #define MPU6050_EXT_SYNC_SET1 MPU6050_D4
 #define MPU6050_EXT_SYNC_SET2 MPU6050_D5
-
 // Combined definitions for the EXT_SYNC_SET values
 #define MPU6050_EXT_SYNC_SET_0 (0)
 #define MPU6050_EXT_SYNC_SET_1 (bit(MPU6050_EXT_SYNC_SET0))
@@ -135,10 +131,6 @@
 #define MPU6050_DLPF_CFG_5 (bit(MPU6050_DLPF_CFG2)|bit(MPU6050_DLPF_CFG0))
 #define MPU6050_DLPF_CFG_6 (bit(MPU6050_DLPF_CFG2)|bit(MPU6050_DLPF_CFG1))
 #define MPU6050_DLPF_CFG_7 (bit(MPU6050_DLPF_CFG2)|bit(MPU6050_DLPF_CFG1)|bit(MPU6050_DLPF_CFG0))
-
-// Alternative names for the combined definitions
-// This name uses the bandwidth (Hz) for the accelometer,
-// for the gyro the bandwidth is almost the same.
 #define MPU6050_DLPF_260HZ    MPU6050_DLPF_CFG_0
 #define MPU6050_DLPF_184HZ    MPU6050_DLPF_CFG_1
 #define MPU6050_DLPF_94HZ     MPU6050_DLPF_CFG_2
@@ -168,12 +160,6 @@
 #define MPU6050_FS_SEL_500  MPU6050_FS_SEL_1
 #define MPU6050_FS_SEL_1000 MPU6050_FS_SEL_2
 #define MPU6050_FS_SEL_2000 MPU6050_FS_SEL_3
-
-// ACCEL_CONFIG Register
-// The XA_ST, YA_ST, ZA_ST are bits for selftest.
-// The AFS_SEL sets the range for the accelerometer.
-// These are the names for the bits.
-// Use these only with the bit() macro.
 #define MPU6050_ACCEL_HPF0 MPU6050_D0
 #define MPU6050_ACCEL_HPF1 MPU6050_D1
 #define MPU6050_ACCEL_HPF2 MPU6050_D2
@@ -621,29 +607,9 @@ volatile uint8_t bUpdateFlagsShared;
 volatile uint16_t ESC_IN_SHARED, ELEVATOR_IN_SHARED, AILERON_IN_SHARED, ppp_in_shared, ppp2_in_shared, ppp3_in_shared;
 //These are used to to to record rising edge of a pulse
 uint32_t ESC_START, ELEVATOR_START, AILERON_START, ppp_start, ppp2_start, ppp3_start;
-//Declare servos
-
-////
-
-
-
 static uint16_t ESC, AILERON, ELEVATOR, ppp, ppp2, ppp3;
 //local updated flags
 static uint8_t bUpdateFlags;
-
-
-
-
-
-
-
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//MITT_DEFINE
-
 
 #include <Wire.h>
 #include <Servo.h>
@@ -654,10 +620,6 @@ Servo myservoR;
 Servo myservoB;
 Servo myservoL;
 //Servo gimbal_ser;
-
-
-
-
 uint32_t timer;
 double dt_;
 
@@ -787,8 +749,6 @@ void test_gyr_acc() {
   }
 }
 
-
-
 void mpu6050_init() {
   MPU6050_write_reg (MPU6050_GYRO_CONFIG, 0x08);  // 0x00 = 250 deg/s _______ 0x08 = 500deg/s (dela med 65.5 för deg/s) ____________  ___ 0x10 = 1000deg/s  ___  0xC = 2500 deg/s
   MPU6050_write_reg (MPU6050_ACCEL_CONFIG, 0x08); // 0x00 = +-2g  _____ 0x08 = +-4 g ___....
@@ -796,13 +756,9 @@ void mpu6050_init() {
 
 }
 
-
-
-
 void print_angle() {
 
 }
-
 
 void motor_arm() {
   delay(2000);
@@ -813,14 +769,12 @@ void motor_arm() {
   delay(4700);
 }
 
-
 void motor_idle() {
   myservoT.write(57); //for degees 0-180
   myservoR.write(57); //for degees 0-180
   myservoB.write(57); //for degees 0-180
   myservoL.write(57); //for degees 0-180
 }
-
 
 void motor_off() {
   main_power = 19;
@@ -831,24 +785,15 @@ void motor_off() {
 }
 
 void stabilize() {
-
-
-
   P_x = (x_a + rad_tilt_LR) * 2.4;
   P_y = (y_a + rad_tilt_TB) * 2.4;
   I_x = I_x + (x_a + rad_tilt_LR) * dt_ * 3.7;
   I_y = I_y + (y_a + rad_tilt_TB) * dt_ * 3.7;
   D_x = x_vel * 0.7;
   D_y = y_vel * 0.7;
-  //2.4 3.7 0.7
-  //YAW
-
   P_z = (z_ang + wanted_z_ang) * 2.0;
   I_z = I_z + (z_ang + wanted_z_ang) * dt_ * 0.8;
   D_z = z_vel * 0.3;
-
-
-
 
   if (P_z > 160) {
     P_z = 160;
@@ -856,7 +801,6 @@ void stabilize() {
   if (P_z < -160) {
     P_z = -160;
   }
-
   if (I_x > 30) {
     I_x = 30;
   }
@@ -875,9 +819,6 @@ void stabilize() {
   if (I_z < -30) {
     I_z = -30;
   }
-
-
-
   x_adder = P_x + I_x + D_x;
   y_adder = P_y + I_y + D_y;
 }
@@ -906,10 +847,6 @@ void set_power() {
 
 }
 
-
-
-
-
 void read_two_data() {
   x_a_mean = 0;
   y_a_mean = 0;
@@ -933,7 +870,6 @@ void read_two_data() {
   y_vel_mean /= 2;
 }
 
-
 void calc_wanted_z_ang() {
   wanted_z_ang = wanted_z_ang + rad_rotate * dt_ * 2;
 
@@ -947,7 +883,6 @@ void zero_on_zero_throttle() {
   I_z = 0;
   //   main_power = 800;
 }
-
 
 void escRead() {
   if (digitalRead(ESC_IN) == HIGH) {
@@ -975,8 +910,6 @@ void aileronRead() {
     bUpdateFlagsShared |= AILERON_FLAG;
   }
 }
-
-
 void pppRead() {
   if (digitalRead(ppp_in) == HIGH) {
     ppp_start = micros();
@@ -1003,8 +936,6 @@ void ppp3Read() {
     bUpdateFlagsShared |= ppp3_flag;
   }
 }
-
-
 void reciever_to_value() {
   if (ESC > 900 && ESC < 2000) {
     main_power = map(ESC, 1080, 2000, 670, 2000);
@@ -1038,11 +969,7 @@ void reciever_to_value() {
 
   PID_tune_2 = 0.1 * (map(ppp3, 1000, 2010, 4, 15));
   PID_tune = 0.1 * (map(ppp2, 1000, 2010, 15, 50));
-  //     gimbal_wanted_ang = map(ppp2,1000,2010,100,0);
-
-
 }
-
 
 void test_radio_reciev() {
   while (ESC > 1120 || ESC < 1060) {
@@ -1074,8 +1001,6 @@ void test_radio_reciev() {
 
   }
 }
-
-
 
 void check_radio_signal() {
   //check shared flags to see if we have a new signal
@@ -1109,12 +1034,7 @@ void check_radio_signal() {
   }
 
   bUpdateFlags = 0;
-
-
-
-
 }
-
 
 void read_acc_gyr() {
   error = MPU6050_read (MPU6050_ACCEL_XOUT_H, (uint8_t *) &accel_t_gyro, sizeof(accel_t_gyro));
@@ -1186,8 +1106,6 @@ int MPU6050_read(int start, uint8_t *buffer, int size)
 
   return (0);  
 }
-
-
 
 int MPU6050_write(int start, const uint8_t *pData, int size)
 {
